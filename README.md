@@ -168,8 +168,13 @@ Alternative web deployment options:
 
 ## App Features
 
-This template includes:
+### ✅ Fully Functional Features
 
+- **Barcode Scanner for Food Tracking** - Scan food barcodes to automatically look up nutrition information
+- **Nutrition Tracking** - Log meals, track calories and macros with daily goals
+- **Activity Tracking** - Log workouts, track steps, distance, and active minutes
+- **Social Features** - Connect with friends, share achievements, join challenges
+- **Goal Setting** - Set and track fitness goals
 - **Cross-platform compatibility** - Works on iOS, Android, and Web
 - **File-based routing** with Expo Router
 - **Tab navigation** with customizable tabs
@@ -177,6 +182,18 @@ This template includes:
 - **TypeScript support** for better development experience
 - **Async storage** for local data persistence
 - **Vector icons** with Lucide React Native
+
+### ⚠️ Features Requiring Production Build
+
+Some features use simulated data in Expo Go and require a production build for full functionality:
+
+- **Heart Rate Monitoring** - Currently uses simulated data; real-time PPG heart rate detection requires production build
+- **Apple Health / Google Health Connect Integration** - Mock implementation; requires native modules in production build
+- **Background Location Tracking** - Limited in Expo Go; full background support requires production build
+
+See **[PRODUCTION_BUILD_GUIDE.md](./PRODUCTION_BUILD_GUIDE.md)** for details on features requiring production builds and how to create them.
+
+See **[TESTING_GUIDE.md](./TESTING_GUIDE.md)** for comprehensive testing instructions.
 
 ## Project Structure
 
