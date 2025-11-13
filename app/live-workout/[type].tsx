@@ -418,7 +418,6 @@ const styles = StyleSheet.create({
     padding: 20,
     alignItems: 'center',
     minWidth: 100,
-    backdropFilter: 'blur(10px)',
   },
   statIcon: {
     width: 48,
