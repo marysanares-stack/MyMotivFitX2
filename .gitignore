@@ -1,0 +1,19 @@
+# Node and build
+node_modules/
+dist/
+build/
+.expo/
+.expo-shared/
+*.log
+Git.log
+
+# macOS
+.DS_Store
+
+# env
+.env
+.env.local
+
+# Editor
+.vscode/
+.idea/
