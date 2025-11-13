@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Group, Message, GroupChallenge, Conversation } from '@/types';
 import { useFitness } from './FitnessContext';
-import { mockUsers } from '@/mocks/data';
+import { useSocial } from './SocialContext';
 
 const STORAGE_KEYS = {
   GROUPS: '@fitness_groups',
@@ -22,6 +22,7 @@ export const [GroupsProvider, useGroups] = createContextHook(() => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [challenges, setChallenges] = useState<GroupChallenge[]>([]);
   const { user, activities } = useFitness();
+  const { friends } = useSocial();
 
   const loadData = useCallback(async () => {
     try {
@@ -182,7 +183,7 @@ export const [GroupsProvider, useGroups] = createContextHook(() => {
         new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
       )[0];
       const unreadCount = directMessages.filter(m => !m.read && m.senderId !== user.id).length;
-      const otherUser = mockUsers.find(u => u.id === userId);
+      const otherUser = friends.find(u => u.id === userId);
 
       if (otherUser) {
         conversations.push({

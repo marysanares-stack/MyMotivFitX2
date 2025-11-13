@@ -4,7 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 import { Activity, DailyStats, WeightEntry, WaterIntake, Mood, Badge, User, SleepEntry, MovementReminderSettings, Goal, GoalProgress, ActivityType, WorkoutPlan, WorkoutSession } from '@/types';
-import { currentUser, MOTIVATIONAL_QUOTES } from '@/mocks/data';
+import { MOTIVATIONAL_QUOTES } from '@/mocks/data';
 import { trpc } from '@/lib/trpc';
 
 const STORAGE_KEYS = {
@@ -38,6 +38,15 @@ function generateId() {
   return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 }
 
+// Default user structure for new users
+const createDefaultUser = (): User => ({
+  id: generateId(),
+  name: '',
+  email: '',
+  avatar: '🙂',
+  friends: [],
+});
+
 export const [FitnessProvider, useFitness] = createContextHook(() => {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [weightEntries, setWeightEntries] = useState<WeightEntry[]>([]);
@@ -46,7 +55,7 @@ export const [FitnessProvider, useFitness] = createContextHook(() => {
   const [badges, setBadges] = useState<Badge[]>([]);
   const [dailyStats, setDailyStats] = useState<DailyStats[]>([]);
   const [sleepEntries, setSleepEntries] = useState<SleepEntry[]>([]);
-  const [user, setUser] = useState<User>(currentUser);
+  const [user, setUser] = useState<User>(createDefaultUser());
   const [isLoading, setIsLoading] = useState(true);
   const [goals, setGoals] = useState<Goal[]>([]);
   const [workoutPlans, setWorkoutPlans] = useState<WorkoutPlan[]>([]);
@@ -83,7 +92,7 @@ export const [FitnessProvider, useFitness] = createContextHook(() => {
           try {
             const parsed = JSON.parse(userData) as User;
             // Ensure friends array is defined
-            setUser({ ...currentUser, ...parsed, friends: parsed.friends ?? currentUser.friends ?? [] });
+            setUser({ ...parsed, friends: parsed.friends ?? [] });
           } catch {}
         }
 
