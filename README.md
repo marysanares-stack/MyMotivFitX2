@@ -1,5 +1,26 @@
 # Welcome to your Rork app
 
+## 🚀 Production Build Ready
+
+This app is **fully configured** for production builds on iOS and Android!
+
+**Quick Start:**
+- 📖 [BUILD_QUICK_START.md](./BUILD_QUICK_START.md) - Build commands & quick reference
+- ✅ [PREFLIGHT_CHECKLIST.md](./PREFLIGHT_CHECKLIST.md) - Pre-build verification
+- 📚 [PRODUCTION_BUILD.md](./PRODUCTION_BUILD.md) - Comprehensive guide
+- 🔍 Run `./validate-build-config.sh` to validate your configuration
+
+**Build Commands:**
+```bash
+# iOS Production Build
+eas build --platform ios --profile production
+
+# Android Production Build
+eas build --platform android --profile production
+```
+
+---
+
 ## Project info
 
 This is a native cross-platform mobile app created with [Rork](https://rork.com)
