@@ -26,7 +26,7 @@ import {
 import Colors from '@/constants/colors';
 import { useGroups } from '@/contexts/GroupsContext';
 import { useFitness } from '@/contexts/FitnessContext';
-import { mockUsers } from '@/mocks/data';
+import { useSocial } from '@/contexts/SocialContext';
 
 type Tab = 'chat' | 'members' | 'challenges' | 'stats';
 
@@ -44,6 +44,7 @@ export default function GroupDetailScreen() {
     deleteGroup,
   } = useGroups();
   const { user, activities } = useFitness();
+  const { friends } = useSocial();
 
   const group = groups.find(g => g.id === id);
   const [activeTab, setActiveTab] = useState<Tab>('chat');
@@ -71,10 +72,13 @@ export default function GroupDetailScreen() {
 
   const messages = getGroupMessages(group.id);
   const challenges = getGroupChallenges(group.id);
-  const members = mockUsers.filter(u => group.members.includes(u.id));
+  
+  // Get members from friends list and include current user
+  const allUsers = [user, ...friends];
+  const members = allUsers.filter(u => group.members.includes(u.id));
   const isAdmin = group.admin === user.id;
-  const availableFriends = mockUsers.filter(
-    u => user.friends.includes(u.id) && !group.members.includes(u.id)
+  const availableFriends = friends.filter(
+    u => !group.members.includes(u.id)
   );
 
   const handleSendMessage = () => {
@@ -274,7 +278,7 @@ export default function GroupDetailScreen() {
                 <View style={styles.leaderboard}>
                   <Text style={styles.leaderboardTitle}>Leaderboard</Text>
                   {challenge.leaderboard.slice(0, 5).map((entry, index) => {
-                    const member = mockUsers.find(u => u.id === entry.userId);
+                    const member = allUsers.find(u => u.id === entry.userId);
                     if (!member) return null;
 
                     const progress = (entry.progress / challenge.goal) * 100;

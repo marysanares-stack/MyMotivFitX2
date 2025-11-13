@@ -12,19 +12,16 @@ import { Stack, useRouter } from 'expo-router';
 import { Users, Plus, TrendingUp, Target, MessageCircle, X } from 'lucide-react-native';
 import Colors from '@/constants/colors';
 import { useGroups } from '@/contexts/GroupsContext';
-import { useFitness } from '@/contexts/FitnessContext';
-import { mockUsers } from '@/mocks/data';
+import { useSocial } from '@/contexts/SocialContext';
 
 export default function GroupsScreen() {
   const { groups, createGroup } = useGroups();
-  const { user } = useFitness();
+  const { friends } = useSocial();
   const router = useRouter();
   const [modalVisible, setModalVisible] = useState(false);
   const [groupName, setGroupName] = useState('');
   const [groupDescription, setGroupDescription] = useState('');
   const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
-
-  const friends = mockUsers.filter(u => user.friends.includes(u.id));
 
   const handleCreateGroup = () => {
     if (!groupName.trim()) return;

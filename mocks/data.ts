@@ -39,76 +39,7 @@ export const AI_AVATAR_OPTIONS = [
   { id: 'ai-avatar-8', url: 'https://r2-pub.rork.com/generated-images/050d8e2e-b212-4cca-8b76-61848a094919.png', category: 'fitness' },
 ];
 
-export const currentUser: User = {
-  id: 'user-1',
-  name: 'Alex Thompson',
-  email: 'alex@example.com',
-  avatar: '🦁',
-  weight: 165,
-  height: 170,
-  age: 28,
-  gender: 'other',
-  friends: ['user-2', 'user-3', 'user-4', 'user-5', 'user-6'],
-};
-
-export const mockUsers: User[] = [
-  currentUser,
-  {
-    id: 'user-2',
-    name: 'Sarah Johnson',
-    email: 'sarah@example.com',
-    avatar: '🦄',
-    weight: 140,
-    height: 165,
-    age: 25,
-    gender: 'female',
-    friends: ['user-1', 'user-3'],
-  },
-  {
-    id: 'user-3',
-    name: 'Mike Chen',
-    email: 'mike@example.com',
-    avatar: '🐲',
-    weight: 180,
-    height: 178,
-    age: 32,
-    gender: 'male',
-    friends: ['user-1', 'user-2', 'user-4'],
-  },
-  {
-    id: 'user-4',
-    name: 'Emma Davis',
-    email: 'emma@example.com',
-    avatar: '🦋',
-    weight: 130,
-    height: 162,
-    age: 27,
-    gender: 'female',
-    friends: ['user-1', 'user-3'],
-  },
-  {
-    id: 'user-5',
-    name: 'James Wilson',
-    email: 'james@example.com',
-    avatar: '🦅',
-    weight: 175,
-    height: 180,
-    age: 30,
-    gender: 'male',
-    friends: ['user-1', 'user-6'],
-  },
-  {
-    id: 'user-6',
-    name: 'Lisa Anderson',
-    email: 'lisa@example.com',
-    avatar: '🐝',
-    weight: 135,
-    height: 168,
-    age: 26,
-    gender: 'female',
-    friends: ['user-1', 'user-5'],
-  },
-];
+// Mock users removed - app now uses real user registration and backend
 
 export const MOTIVATIONAL_QUOTES = [
   "The only bad workout is the one you didn't do.",
