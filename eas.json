@@ -1,0 +1,13 @@
+{
+  "build": {
+    "production": {
+      "android": {
+        "resourceClass": "medium"
+      },
+      "ios": {
+        "resourceClass": "large"
+      }
+    }
+  }
+}
+
