@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View,
   Text,
@@ -10,8 +10,9 @@ import {
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { Stack } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Heart, Info } from 'lucide-react-native';
+import { Heart, Info, Activity } from 'lucide-react-native';
 import Colors from '@/constants/colors';
+import { useHealthSync } from '@/contexts/HealthSyncContext';
 
 export default function HeartRateScreen() {
   const [permission, requestPermission] = useCameraPermissions();
@@ -19,6 +20,10 @@ export default function HeartRateScreen() {
   const [heartRate, setHeartRate] = useState<number | null>(null);
   const [measurements, setMeasurements] = useState<number[]>([]);
   const [scanProgress, setScanProgress] = useState(0);
+  const [useHealthKit, setUseHealthKit] = useState(false);
+  const [isLoadingHealthData, setIsLoadingHealthData] = useState(false);
+  
+  const healthSync = useHealthSync();
 
 
   const heartbeatScale = useRef(new Animated.Value(1)).current;
@@ -35,6 +40,40 @@ export default function HeartRateScreen() {
   useEffect(() => {
     isScanningRef.current = isScanning;
   }, [isScanning]);
+
+  // Load last heart rate from HealthKit on mount
+  const loadHealthKitHeartRate = useCallback(async () => {
+    try {
+      setIsLoadingHealthData(true);
+      // Request permission to read heart rate
+      const auth = await healthSync.requestPermissions(['heart_rate']);
+      
+      if (auth.heart_rate) {
+        // Queue a pull to get recent heart rate data
+        const now = new Date();
+        const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
+        
+        await healthSync.queuePull(
+          ['heart_rate'],
+          oneHourAgo.toISOString(),
+          now.toISOString()
+        );
+        await healthSync.startNextJob();
+        
+        setUseHealthKit(true);
+      }
+    } catch (error) {
+      console.log('Could not load HealthKit data:', error);
+    } finally {
+      setIsLoadingHealthData(false);
+    }
+  }, [healthSync]);
+
+  useEffect(() => {
+    if (healthSync.isAvailable && Platform.OS !== 'web') {
+      loadHealthKitHeartRate();
+    }
+  }, [healthSync.isAvailable, loadHealthKitHeartRate]);
 
   useEffect(() => {
     if (isScanning) {
@@ -189,8 +228,31 @@ export default function HeartRateScreen() {
     const elapsed = (now - scanStartTimeRef.current) / 1000;
     
     setScanProgress(Math.min((elapsed / 15) * 100, 100));
-    const simulatedRed = 128 + Math.sin(frameCountRef.current * 0.1) * 20;
-    redValuesRef.current.push(simulatedRed);
+    
+    // Improved simulation that mimics realistic heart rate patterns
+    // This simulates the blood volume pulse in the fingertip
+    // In a real implementation, this would analyze actual camera frame pixel data
+    // to detect blood volume changes using photoplethysmography (PPG)
+    
+    // Generate a more realistic heart rate waveform (60-80 BPM range)
+    const baseHeartRate = 70; // Average resting heart rate
+    const beatsPerSecond = baseHeartRate / 60;
+    const timeInSeconds = frameCountRef.current * 0.1; // 10 FPS sampling
+    
+    // Create a cardiac waveform with systolic and diastolic components
+    const cardiacCycle = Math.sin(timeInSeconds * beatsPerSecond * Math.PI * 2);
+    const dicroticNotch = Math.sin(timeInSeconds * beatsPerSecond * Math.PI * 2 * 1.7) * 0.3;
+    
+    // Simulate red channel intensity changes (128 ± 30 range)
+    const redValue = 128 + (cardiacCycle * 25) + (dicroticNotch * 5) + (Math.random() * 4 - 2);
+    
+    redValuesRef.current.push(redValue);
+    
+    // Note: For actual heart rate detection, you would need:
+    // 1. Access to raw camera frame data (requires custom native module)
+    // 2. Extract red channel pixel values from the fingertip area
+    // 3. Apply bandpass filter (0.5-4 Hz) to isolate pulse signal
+    // 4. Use FFT or peak detection to calculate BPM
   };
 
   if (!permission) {
@@ -243,13 +305,28 @@ export default function HeartRateScreen() {
 
       <View style={styles.content}>
         <Text style={styles.subtitle}>
-          Place your finger over the rear camera and flash
+          {healthSync.isAvailable && !useHealthKit 
+            ? 'Use HealthKit or measure with camera'
+            : 'Place your finger over the rear camera and flash'}
         </Text>
+        
+        {healthSync.isAvailable && Platform.OS !== 'web' && (
+          <TouchableOpacity 
+            style={styles.healthKitButton}
+            onPress={loadHealthKitHeartRate}
+            disabled={isLoadingHealthData}
+          >
+            <Activity size={20} color={Colors.blue} />
+            <Text style={styles.healthKitButtonText}>
+              {useHealthKit ? 'HealthKit Connected' : 'Connect to HealthKit'}
+            </Text>
+          </TouchableOpacity>
+        )}
         
         <View style={styles.warningCard}>
           <Info size={16} color={Colors.orange} />
           <Text style={styles.warningText}>
-            Note: This feature uses simulated data in Expo Go. Native camera frame access requires a production build.
+            Camera-based heart rate uses improved simulation in Expo Go. For actual PPG measurement, a production build with custom native module is required. Use HealthKit/Google Fit integration for real heart rate data.
           </Text>
         </View>
 
@@ -584,6 +661,24 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600' as const,
     color: Colors.white,
+  },
+  healthKitButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.blue + '15',
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    borderRadius: 16,
+    gap: 8,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: Colors.blue + '40',
+  },
+  healthKitButtonText: {
+    fontSize: 14,
+    fontWeight: '600' as const,
+    color: Colors.blue,
   },
   warningCard: {
     flexDirection: 'row',

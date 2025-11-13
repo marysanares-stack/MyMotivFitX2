@@ -9,6 +9,7 @@ import {
   Modal,
   Platform,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Stack } from 'expo-router';
@@ -117,26 +118,56 @@ export default function NutritionScreen() {
 
     try {
       const response = await fetch(`https://world.openfoodfacts.org/api/v0/product/${data}.json`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch product data');
+      }
+      
       const result = await response.json();
 
       if (result.status === 1 && result.product) {
         const product = result.product;
         const nutriments = product.nutriments || {};
 
-        setFoodName(product.product_name || 'Unknown Product');
-        setCalories(String(Math.round(nutriments.energy_value || nutriments['energy-kcal_100g'] || 0)));
-        setProtein(String(Math.round(nutriments.proteins_100g || 0)));
-        setCarbs(String(Math.round(nutriments.carbohydrates_100g || 0)));
-        setFat(String(Math.round(nutriments.fat_100g || 0)));
-        setServingSize(product.serving_size || '100g');
+        // Extract nutritional information
+        const calories = nutriments.energy_value || nutriments['energy-kcal_100g'] || nutriments['energy-kcal'] || 0;
+        const protein = nutriments.proteins_100g || nutriments.proteins || 0;
+        const carbs = nutriments.carbohydrates_100g || nutriments.carbohydrates || 0;
+        const fat = nutriments.fat_100g || nutriments.fat || 0;
+
+        setFoodName(product.product_name || product.product_name_en || 'Unknown Product');
+        setCalories(String(Math.round(calories)));
+        setProtein(String(Math.round(protein)));
+        setCarbs(String(Math.round(carbs)));
+        setFat(String(Math.round(fat)));
+        setServingSize(product.serving_size || product.serving_quantity || '100g');
         setShowAddModal(true);
+        
+        console.log('Product found:', product.product_name);
       } else {
-        console.log('Product not found in database');
+        console.log('Product not found in database for barcode:', data);
+        // Show alert and open modal for manual entry
+        if (Platform.OS !== 'web') {
+          Alert.alert(
+            'Product Not Found',
+            'This product is not in our database. Please enter the nutritional information manually.',
+            [{ text: 'OK' }]
+          );
+        }
         setFoodName('');
         setShowAddModal(true);
       }
     } catch (error) {
       console.error('Error looking up barcode:', error);
+      // Show error alert
+      if (Platform.OS !== 'web') {
+        Alert.alert(
+          'Connection Error',
+          'Could not connect to the food database. Please check your internet connection and try again, or enter the information manually.',
+          [{ text: 'OK' }]
+        );
+      }
+      setFoodName('');
       setShowAddModal(true);
     } finally {
       setIsLookingUpBarcode(false);
@@ -466,9 +497,9 @@ export default function NutritionScreen() {
             <CameraView
               style={styles.camera}
               facing="back"
-              enableTorch={true}
+              enableTorch={false}
               barcodeScannerSettings={{
-                barcodeTypes: ['ean13', 'ean8', 'upc_a', 'upc_e'],
+                barcodeTypes: ['ean13', 'ean8', 'upc_a', 'upc_e', 'qr', 'code128', 'code39'],
               }}
               onBarcodeScanned={hasScanned ? undefined : handleBarcodeScanned}
             >
@@ -476,6 +507,9 @@ export default function NutritionScreen() {
                 <View style={styles.scanFrame} />
                 <Text style={styles.scanInstructions}>
                   Position the barcode within the frame
+                </Text>
+                <Text style={styles.scanSubInstructions}>
+                  Supported: UPC, EAN, QR codes
                 </Text>
               </View>
             </CameraView>
@@ -857,6 +891,17 @@ const styles = StyleSheet.create({
     color: Colors.white,
     textAlign: 'center',
     paddingHorizontal: 40,
+    textShadowColor: 'rgba(0, 0, 0, 0.75)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
+  },
+  scanSubInstructions: {
+    marginTop: 8,
+    fontSize: 13,
+    fontWeight: '400' as const,
+    color: Colors.white,
+    textAlign: 'center',
+    opacity: 0.8,
     textShadowColor: 'rgba(0, 0, 0, 0.75)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 3,
