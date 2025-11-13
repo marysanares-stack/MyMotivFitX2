@@ -1,3 +1,10 @@
+// Nutrition Tracking Screen with Barcode Scanner
+// The barcode scanner is FULLY FUNCTIONAL in Expo Go and production builds.
+// It uses expo-camera to scan food barcodes (EAN13, EAN8, UPC-A, UPC-E)
+// and integrates with OpenFoodFacts API to automatically look up nutrition information.
+// Camera permissions are properly configured in app.json.
+// Note: Barcode scanning is not available on web (camera API limitation).
+
 import { useState } from 'react';
 import {
   View,

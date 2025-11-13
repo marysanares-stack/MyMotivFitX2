@@ -249,7 +249,7 @@ export default function HeartRateScreen() {
         <View style={styles.warningCard}>
           <Info size={16} color={Colors.orange} />
           <Text style={styles.warningText}>
-            Note: This feature uses simulated data in Expo Go. Native camera frame access requires a production build.
+            Note: This feature uses simulated data in Expo Go. Real heart rate detection via photoplethysmography (PPG) requires camera frame access, which is only available in production builds. See PRODUCTION_BUILD_GUIDE.md for details.
           </Text>
         </View>
 
