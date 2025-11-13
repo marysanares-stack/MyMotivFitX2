@@ -5,19 +5,71 @@
         "pre-install": "bash ./eas-build-pre-install.sh"
       },
       "env": {
+        "RORK_AUTH_TOKEN": "@RORK_AUTH_TOKEN",
+        "NODE_ENV": "production"
+      },
+      "node": "22.11.0",
+      "channel": "production",
+      "android": { 
+        "resourceClass": "medium",
+        "buildType": "apk"
+      },
+      "ios": { 
+        "resourceClass": "large",
+        "buildConfiguration": "Release"
+      }
+    },
+    "preview": {
+      "hooks": {
+        "pre-install": "bash ./eas-build-pre-install.sh"
+      },
+      "env": {
         "RORK_AUTH_TOKEN": "@RORK_AUTH_TOKEN"
       },
       "node": "22.11.0",
+      "distribution": "internal",
+      "channel": "preview",
       "android": { "resourceClass": "medium" },
-      "ios": { "resourceClass": "large" }
+      "ios": { "resourceClass": "medium" }
+    },
+    "development": {
+      "hooks": {
+        "pre-install": "bash ./eas-build-pre-install.sh"
+      },
+      "env": {
+        "RORK_AUTH_TOKEN": "@RORK_AUTH_TOKEN"
+      },
+      "node": "22.11.0",
+      "developmentClient": true,
+      "distribution": "internal",
+      "channel": "development",
+      "android": { "resourceClass": "medium" },
+      "ios": { "resourceClass": "medium" }
     },
     "internal": {
+      "hooks": {
+        "pre-install": "bash ./eas-build-pre-install.sh"
+      },
+      "env": {
+        "RORK_AUTH_TOKEN": "@RORK_AUTH_TOKEN"
+      },
+      "node": "22.11.0",
       "distribution": "internal",
       "ios": { "resourceClass": "medium" },
       "android": { "resourceClass": "medium" }
     }
   },
   "submit": {
-    "production": {}
+    "production": {
+      "ios": {
+        "appleId": "your-apple-id@example.com",
+        "ascAppId": "placeholder",
+        "appleTeamId": "placeholder"
+      },
+      "android": {
+        "serviceAccountKeyPath": "./path-to-service-account-key.json",
+        "track": "internal"
+      }
+    }
   }
 }
