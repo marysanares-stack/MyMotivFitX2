@@ -10,6 +10,7 @@ import { GroupsProvider } from "@/contexts/GroupsContext";
 import { trpc, trpcClient } from "@/lib/trpc";
 import { MotivationProvider } from "@/contexts/MotivationContext";
 import { HealthSyncProvider } from "@/contexts/HealthSyncContext";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import Colors from "@/constants/colors";
 // useFitness is used inside RootLayoutNav
 
@@ -103,22 +104,24 @@ export default function RootLayout() {
   }
 
   return (
-    <trpc.Provider client={trpcClient} queryClient={queryClient}>
-      <QueryClientProvider client={queryClient}>
-        <FitnessProvider>
-          <SocialProvider>
-            <GroupsProvider>
-              <MotivationProvider>
-                <HealthSyncProvider>
-                  <GestureHandlerRootView style={{ flex: 1 }}>
-                    <RootLayoutNav />
-                  </GestureHandlerRootView>
-                </HealthSyncProvider>
-              </MotivationProvider>
-            </GroupsProvider>
-          </SocialProvider>
-        </FitnessProvider>
-      </QueryClientProvider>
-    </trpc.Provider>
+    <ErrorBoundary>
+      <trpc.Provider client={trpcClient} queryClient={queryClient}>
+        <QueryClientProvider client={queryClient}>
+          <FitnessProvider>
+            <SocialProvider>
+              <GroupsProvider>
+                <MotivationProvider>
+                  <HealthSyncProvider>
+                    <GestureHandlerRootView style={{ flex: 1 }}>
+                      <RootLayoutNav />
+                    </GestureHandlerRootView>
+                  </HealthSyncProvider>
+                </MotivationProvider>
+              </GroupsProvider>
+            </SocialProvider>
+          </FitnessProvider>
+        </QueryClientProvider>
+      </trpc.Provider>
+    </ErrorBoundary>
   );
 }
