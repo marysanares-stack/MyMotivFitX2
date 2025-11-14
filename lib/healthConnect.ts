@@ -29,7 +29,7 @@ class HealthConnectService {
       // Check if Health Connect is available
       const isAvailable = await initialize();
       
-      if (isAvailable === SdkAvailabilityStatus.SDK_AVAILABLE) {
+      if (isAvailable === SdkAvailabilityStatus.SDK_AVAILABLE || isAvailable === true) {
         console.log('Health Connect is available');
         
         // Request permissions
@@ -39,7 +39,7 @@ class HealthConnectService {
           { accessType: 'read', recordType: 'Distance' },
           { accessType: 'read', recordType: 'TotalCaloriesBurned' },
           { accessType: 'write', recordType: 'HeartRate' },
-        ]);
+        ] as any);
 
         console.log('Granted permissions:', grantedPermissions);
         this.initialized = true;
@@ -75,7 +75,7 @@ class HealthConnectService {
       const startTime = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
       const endTime = new Date().toISOString();
 
-      const result = await readRecords('HeartRate', {
+      const result: any = await readRecords('HeartRate', {
         timeRangeFilter: {
           operator: 'between',
           startTime,
@@ -117,7 +117,7 @@ class HealthConnectService {
     }
 
     try {
-      const result = await readRecords('HeartRate', {
+      const result: any = await readRecords('HeartRate', {
         timeRangeFilter: {
           operator: 'between',
           startTime: startDate.toISOString(),
@@ -163,7 +163,7 @@ class HealthConnectService {
           recordType: 'HeartRate',
           beatsPerMinute: value,
           time: timestamp,
-        },
+        } as any,
       ]);
 
       console.log('Heart rate saved to Health Connect');

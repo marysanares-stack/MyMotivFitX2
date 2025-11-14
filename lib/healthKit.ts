@@ -71,9 +71,9 @@ class HealthKitService {
     }
 
     return new Promise((resolve) => {
-      const options = {
+      const options: any = {
         unit: 'bpm',
-        startDate: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), // Last 24 hours
+        startDate: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
         endDate: new Date().toISOString(),
         ascending: false,
         limit: 1,
@@ -116,7 +116,7 @@ class HealthKitService {
     }
 
     return new Promise((resolve) => {
-      const options = {
+      const options: any = {
         unit: 'bpm',
         startDate: startDate.toISOString(),
         endDate: endDate.toISOString(),
@@ -158,7 +158,7 @@ class HealthKitService {
     }
 
     return new Promise((resolve) => {
-      const options = {
+      const options: any = {
         unit: 'bpm',
         startDate: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
         endDate: new Date().toISOString(),
@@ -166,7 +166,7 @@ class HealthKitService {
 
       AppleHealthKit.getRestingHeartRate(
         options,
-        (err: Object, results: HealthValue[]) => {
+        (err: Object, results: any) => {
           if (err) {
             console.log('Error getting resting heart rate:', err);
             resolve(null);
@@ -200,7 +200,7 @@ class HealthKitService {
 
       AppleHealthKit.saveHeartRateSample(
         options,
-        (err: Object, result: string) => {
+        (err: Object, result: any) => {
           if (err) {
             console.log('Error saving heart rate:', err);
             resolve(false);

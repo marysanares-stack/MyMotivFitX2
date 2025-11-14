@@ -21,7 +21,7 @@ export default function HeartRateScreen() {
   const [measurements, setMeasurements] = useState<number[]>([]);
   const [scanProgress, setScanProgress] = useState(0);
   const [healthDataAvailable, setHealthDataAvailable] = useState(false);
-  const [useHealthData, setUseHealthData] = useState(true);
+  const [useHealthData] = useState(true);
 
 
   const heartbeatScale = useRef(new Animated.Value(1)).current;
@@ -43,7 +43,7 @@ export default function HeartRateScreen() {
   useEffect(() => {
     const initHealth = async () => {
       if (Platform.OS !== 'web') {
-        const initialized = await healthService.initialize();
+        await healthService.initialize();
         const available = healthService.isAvailable();
         setHealthDataAvailable(available);
         console.log('Health data available:', available);
