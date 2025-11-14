@@ -61,7 +61,12 @@
         "FOREGROUND_SERVICE",
         "FOREGROUND_SERVICE_LOCATION",
         "VIBRATE",
-        "ACTIVITY_RECOGNITION"
+        "ACTIVITY_RECOGNITION",
+        "android.permission.health.READ_HEART_RATE",
+        "android.permission.health.READ_STEPS",
+        "android.permission.health.READ_DISTANCE",
+        "android.permission.health.READ_EXERCISE",
+        "android.permission.health.WRITE_HEART_RATE"
       ]
     },
     "web": {
@@ -100,7 +105,15 @@
           "isIosBackgroundLocationEnabled": false,
           "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location."
         }
-      ]
+      ],
+      [
+        "react-native-health",
+        {
+          "isClinicalDataEnabled": false,
+          "isBackgroundDeliveryEnabled": false
+        }
+      ],
+      "./plugins/withHealthConnect"
     ],
     "experiments": {
       "typedRoutes": true

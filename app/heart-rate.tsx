@@ -10,8 +10,9 @@ import {
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { Stack } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Heart, Info } from 'lucide-react-native';
+import { Heart, Info, Activity } from 'lucide-react-native';
 import Colors from '@/constants/colors';
+import { healthService } from '@/lib/healthService';
 
 export default function HeartRateScreen() {
   const [permission, requestPermission] = useCameraPermissions();
@@ -19,6 +20,8 @@ export default function HeartRateScreen() {
   const [heartRate, setHeartRate] = useState<number | null>(null);
   const [measurements, setMeasurements] = useState<number[]>([]);
   const [scanProgress, setScanProgress] = useState(0);
+  const [healthDataAvailable, setHealthDataAvailable] = useState(false);
+  const [useHealthData] = useState(true);
 
 
   const heartbeatScale = useRef(new Animated.Value(1)).current;
@@ -35,6 +38,29 @@ export default function HeartRateScreen() {
   useEffect(() => {
     isScanningRef.current = isScanning;
   }, [isScanning]);
+
+  // Initialize health data on mount
+  useEffect(() => {
+    const initHealth = async () => {
+      if (Platform.OS !== 'web') {
+        await healthService.initialize();
+        const available = healthService.isAvailable();
+        setHealthDataAvailable(available);
+        console.log('Health data available:', available);
+        
+        // Load latest heart rate if available
+        if (available) {
+          const latest = await healthService.getLatestHeartRate();
+          if (latest && latest.value) {
+            setHeartRate(latest.value);
+            setMeasurements(prev => [...prev, latest.value]);
+          }
+        }
+      }
+    };
+    
+    initHealth();
+  }, []);
 
   useEffect(() => {
     if (isScanning) {
@@ -86,8 +112,25 @@ export default function HeartRateScreen() {
     };
   }, [isScanning, heartbeatScale, progressAnim]);
 
-  const startScanning = () => {
+  const startScanning = async () => {
     console.log('Starting heart rate scan');
+    
+    // If health data is available and user wants to use it, try that first
+    if (healthDataAvailable && useHealthData && Platform.OS !== 'web') {
+      try {
+        const latest = await healthService.getLatestHeartRate();
+        if (latest && latest.value) {
+          setHeartRate(latest.value);
+          setMeasurements(prev => [...prev, latest.value]);
+          console.log('Retrieved heart rate from health data:', latest.value);
+          return;
+        }
+      } catch (error) {
+        console.log('Error getting health data, falling back to camera:', error);
+      }
+    }
+    
+    // Fall back to camera-based measurement
     setIsScanning(true);
     setHeartRate(null);
     setScanProgress(0);
@@ -120,7 +163,7 @@ export default function HeartRateScreen() {
     }, 15000);
   };
 
-  const stopScanning = () => {
+  const stopScanning = async () => {
     console.log('Stopping heart rate scan');
     // Clear interval/timeout and stop any running animation immediately
     if (intervalRef.current) {
@@ -148,6 +191,16 @@ export default function HeartRateScreen() {
         setHeartRate(calculatedBPM);
         setMeasurements(prev => [...prev, calculatedBPM]);
         console.log('Heart rate calculated:', calculatedBPM);
+        
+        // Save to health data if available
+        if (healthDataAvailable && Platform.OS !== 'web') {
+          try {
+            await healthService.saveHeartRateSample(calculatedBPM);
+            console.log('Saved heart rate to health data');
+          } catch (error) {
+            console.log('Error saving to health data:', error);
+          }
+        }
       }
     }
     
@@ -242,16 +295,29 @@ export default function HeartRateScreen() {
       />
 
       <View style={styles.content}>
+        {healthDataAvailable && (
+          <View style={styles.healthBadge}>
+            <Activity size={16} color={Colors.green} />
+            <Text style={styles.healthBadgeText}>
+              {Platform.OS === 'ios' ? 'HealthKit' : 'Health Connect'} Connected
+            </Text>
+          </View>
+        )}
+        
         <Text style={styles.subtitle}>
-          Place your finger over the rear camera and flash
+          {healthDataAvailable && useHealthData
+            ? 'Tap to get your latest heart rate from health data'
+            : 'Place your finger over the rear camera and flash'}
         </Text>
         
-        <View style={styles.warningCard}>
-          <Info size={16} color={Colors.orange} />
-          <Text style={styles.warningText}>
-            Note: This feature uses simulated data in Expo Go. Native camera frame access requires a production build.
-          </Text>
-        </View>
+        {!healthDataAvailable && Platform.OS !== 'web' && (
+          <View style={styles.warningCard}>
+            <Info size={16} color={Colors.orange} />
+            <Text style={styles.warningText}>
+              For best results, use a production build with {Platform.OS === 'ios' ? 'HealthKit' : 'Health Connect'} access for real heart rate data.
+            </Text>
+          </View>
+        )}
 
         <View style={styles.cameraContainer}>
           {Platform.OS !== 'web' ? (
@@ -355,7 +421,7 @@ export default function HeartRateScreen() {
             style={styles.scanButtonGradient}
           >
             <Text style={styles.scanButtonText}>
-              {isScanning ? 'Stop Scanning' : 'Start Scanning'}
+              {isScanning ? 'Stop Scanning' : healthDataAvailable && useHealthData ? 'Get Heart Rate' : 'Start Scanning'}
             </Text>
           </LinearGradient>
         </TouchableOpacity>
@@ -379,6 +445,22 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     padding: 20,
+  },
+  healthBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    backgroundColor: Colors.green + '20',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    gap: 6,
+    marginBottom: 16,
+  },
+  healthBadgeText: {
+    fontSize: 13,
+    fontWeight: '600' as const,
+    color: Colors.green,
   },
   permissionContainer: {
     flex: 1,
